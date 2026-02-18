@@ -1,0 +1,38 @@
+import React from 'react'
+import { Navigate, Route, Routes } from 'react-router-dom'
+import AppShell from './components/AppShell'
+import Login from './pages/Login'
+import Home from './pages/Home'
+import Dashboard from './pages/Dashboard'
+import Designer from './pages/Designer'
+import Designs from './pages/Designs'
+import About from './pages/About'
+import { useAuth } from './store/useAuth'
+
+function ProtectedRoute({ children }) {
+  const { isAuthed } = useAuth()
+  return isAuthed ? children : <Navigate to="/login" replace />
+}
+
+export default function App() {
+  return (
+    <Routes>
+      <Route path="/login" element={<Login />} />
+      <Route
+        path="/"
+        element={
+          <ProtectedRoute>
+            <AppShell />
+          </ProtectedRoute>
+        }
+      >
+        <Route index element={<Home />} />
+        <Route path="dashboard" element={<Dashboard />} />
+        <Route path="designer" element={<Designer />} />
+        <Route path="designs" element={<Designs />} />
+        <Route path="about" element={<About />} />
+      </Route>
+      <Route path="*" element={<Navigate to="/" replace />} />
+    </Routes>
+  )
+}
