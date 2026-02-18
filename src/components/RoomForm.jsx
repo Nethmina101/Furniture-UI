@@ -44,7 +44,12 @@ export default function RoomForm({ room, onChange }) {
             onChange={(e) => onChange({ shape: e.target.value })}
           >
             <option value="RECT">Rectangle</option>
-            <option value="L">L-shape</option>
+            <option value="L">L-Shape (Top-Right)</option>
+            <option value="L_REV">L-Shape (Top-Left)</option>
+            <option value="U">U-Shape</option>
+            <option value="CIRCLE">Circle</option>
+            <option value="OVAL">Oval</option>
+            <option value="SEMICIRCLE">Semi-Circle</option>
           </select>
         </label>
         <label className="field">

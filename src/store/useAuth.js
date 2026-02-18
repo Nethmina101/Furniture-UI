@@ -4,8 +4,7 @@ import { storage } from './storage'
 const AUTH_KEY = 'fd_auth_v1'
 
 const demoUsers = [
-  { username: 'designer', password: 'designer123', name: 'Store Designer' },
-  { username: 'admin', password: 'admin123', name: 'Admin' }
+  { username: 'designer', password: 'designer123', name: 'Store Designer' }
 ]
 
 export const useAuth = create((set) => ({

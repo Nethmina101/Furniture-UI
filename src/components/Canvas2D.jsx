@@ -1,33 +1,20 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react'
 import { Layer, Line, Rect, Stage, Text, Transformer, Group } from 'react-konva'
+import { generateRoomPolygon } from '../utils/roomShape'
 
 function roomPolygon(room, scale, pad) {
-  const w = room.width * scale
-  const h = room.height * scale
-  const x0 = pad
-  const y0 = pad
+  // Use the shared utility
+  // It returns [{x,y}, ...]
+  const basePoints = generateRoomPolygon(room.width, room.height, room.shape)
 
-  if (room.shape === 'L') {
-    // L shape: remove a top-right chunk
-    const cutW = w * 0.35
-    const cutH = h * 0.35
-    return [
-      x0,
-      y0,
-      x0 + w - cutW,
-      y0,
-      x0 + w - cutW,
-      y0 + cutH,
-      x0 + w,
-      y0 + cutH,
-      x0 + w,
-      y0 + h,
-      x0,
-      y0 + h
-    ]
+  // Convert to flat array [rx, ry, rx, ry...] scaled and padded
+  // The utility returns relative to 0,0. We need to scale and add pad.
+  const flat = []
+  for (const p of basePoints) {
+    flat.push(pad + p.x * scale)
+    flat.push(pad + p.y * scale)
   }
-
-  return [x0, y0, x0 + w, y0, x0 + w, y0 + h, x0, y0 + h]
+  return flat
 }
 
 export default function Canvas2D({ room, items, selectedId, onSelect, onChangeItems }) {
@@ -107,13 +94,13 @@ export default function Canvas2D({ room, items, selectedId, onSelect, onChangeIt
       items.map((it) =>
         it.id === id
           ? {
-              ...it,
-              x: toCm(node.x() - pad),
-              y: toCm(node.y() - pad),
-              w: toCm(wPx) / it.scale,
-              h: toCm(hPx) / it.scale,
-              rotation: node.rotation()
-            }
+            ...it,
+            x: toCm(node.x() - pad),
+            y: toCm(node.y() - pad),
+            w: toCm(wPx) / it.scale,
+            h: toCm(hPx) / it.scale,
+            rotation: node.rotation()
+          }
           : it
       )
     )
@@ -168,6 +155,8 @@ export default function Canvas2D({ room, items, selectedId, onSelect, onChangeIt
                   if (node) itemRefs.current[it.id] = node
                 }}
                 onTransformEnd={(e) => onTransformEnd(it.id, e)}
+                width={wPx}
+                height={hPx}
               >
                 <Rect
                   width={wPx}

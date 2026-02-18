@@ -122,25 +122,6 @@ export default function Designer() {
         </div>
 
         <RoomForm room={room} onChange={saveRoomPatch} />
-      </div>
-
-      <div className="designerCenter">
-        {tab === '2D' ? (
-          <Canvas2D
-            room={room}
-            items={items}
-            selectedId={selectedId}
-            onSelect={setSelectedId}
-            onChangeItems={saveItems}
-          />
-        ) : (
-          <View3D room={room} items={items} />
-        )}
-      </div>
-
-      <div className="designerTools">
-        <FurniturePalette onAdd={addFurniture} />
-        <SelectionInspector item={selected} onChange={patchSelected} onRemove={removeSelected} />
 
         <div className="card" style={{ padding: 12 }}>
           <div className="sectionTitle">Actions</div>
@@ -171,6 +152,25 @@ export default function Designer() {
             Everything is saved automatically (LocalStorage) for fast demo.
           </div>
         </div>
+      </div>
+
+      <div className="designerCenter">
+        {tab === '2D' ? (
+          <Canvas2D
+            room={room}
+            items={items}
+            selectedId={selectedId}
+            onSelect={setSelectedId}
+            onChangeItems={saveItems}
+          />
+        ) : (
+          <View3D room={room} items={items} />
+        )}
+      </div>
+
+      <div className="designerTools">
+        <FurniturePalette onAdd={addFurniture} />
+        <SelectionInspector item={selected} onChange={patchSelected} onRemove={removeSelected} />
       </div>
     </div>
   )

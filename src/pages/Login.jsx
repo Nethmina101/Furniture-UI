@@ -11,7 +11,7 @@ export default function Login() {
 
   const credsHint = useMemo(
     () =>
-      `Demo credentials:\n- designer / designer123\n- admin / admin123`,
+      `Demo credentials:\n- designer / designer123`,
     []
   )
 

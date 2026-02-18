@@ -10,6 +10,7 @@ export default function FurniturePalette({ onAdd }) {
           <button
             key={f.type}
             className="paletteItem"
+            style={{ color: 'white' }}
             onClick={() => onAdd(f.type)}
             title={`Add ${f.label}`}
           >
@@ -32,13 +33,23 @@ function iconFor(type) {
     case 'chair':
       return '🪑'
     case 'table':
-      return '🪟'
+      return '🪵'
     case 'bed':
       return '🛏️'
     case 'sofa':
       return '🛋️'
     case 'wardrobe':
       return '🚪'
+    case 'bookshelf':
+      return '📚'
+    case 'plant':
+      return '🪴'
+    case 'rug':
+      return '🧶'
+    case 'tv_unit':
+      return '📺'
+    case 'window':
+      return '🪟'
     default:
       return '⬛'
   }

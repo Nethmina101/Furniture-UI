@@ -28,6 +28,36 @@ export const furnitureCatalog = [
     label: 'Wardrobe',
     footprint: { w: 140, h: 60 },
     color: '#c2b59b'
+  },
+  {
+    type: 'bookshelf',
+    label: 'Bookshelf',
+    footprint: { w: 100, h: 40 },
+    color: '#8b5a2b'
+  },
+  {
+    type: 'plant',
+    label: 'Plant',
+    footprint: { w: 40, h: 40 },
+    color: '#4a7023'
+  },
+  {
+    type: 'rug',
+    label: 'Rug',
+    footprint: { w: 200, h: 140 },
+    color: '#d66e53'
+  },
+  {
+    type: 'tv_unit',
+    label: 'TV Unit',
+    footprint: { w: 160, h: 40 },
+    color: '#333333'
+  },
+  {
+    type: 'window',
+    label: 'Window',
+    footprint: { w: 100, h: 15 },
+    color: '#aaddff'
   }
 ]
 

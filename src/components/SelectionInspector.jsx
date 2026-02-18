@@ -29,20 +29,6 @@ export default function SelectionInspector({ item, onChange, onRemove }) {
           />
         </label>
         <label className="field">
-          <span>Scale</span>
-          <input
-            type="range"
-            min={0.5}
-            max={1.8}
-            step={0.05}
-            value={item.scale}
-            onChange={(e) => onChange({ scale: Number(e.target.value) })}
-          />
-        </label>
-      </div>
-
-      <div className="grid2" style={{ gap: 8 }}>
-        <label className="field">
           <span>Colour</span>
           <input
             type="color"
@@ -50,18 +36,31 @@ export default function SelectionInspector({ item, onChange, onRemove }) {
             onChange={(e) => onChange({ color: e.target.value })}
           />
         </label>
-        <label className="field">
-          <span>Shade</span>
-          <input
-            type="range"
-            min={0}
-            max={0.8}
-            step={0.05}
-            value={item.shade}
-            onChange={(e) => onChange({ shade: Number(e.target.value) })}
-          />
-        </label>
       </div>
+
+      <label className="field">
+        <span>Scale: {Math.round(item.scale * 100)}%</span>
+        <input
+          type="range"
+          min={0.5}
+          max={1.8}
+          step={0.05}
+          value={item.scale}
+          onChange={(e) => onChange({ scale: Number(e.target.value) })}
+        />
+      </label>
+
+      <label className="field">
+        <span>Shade</span>
+        <input
+          type="range"
+          min={0}
+          max={0.8}
+          step={0.05}
+          value={item.shade}
+          onChange={(e) => onChange({ shade: Number(e.target.value) })}
+        />
+      </label>
 
       <div className="muted" style={{ fontSize: 12 }}>
         Shade affects the drop-shadow in 2D and ambient darkening in 3D.

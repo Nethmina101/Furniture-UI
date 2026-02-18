@@ -2,6 +2,7 @@ import React, { useMemo } from 'react'
 import { Canvas } from '@react-three/fiber'
 import { OrbitControls, ContactShadows, Environment } from '@react-three/drei'
 import * as THREE from 'three'
+import { generateRoomPolygon } from '../utils/roomShape'
 
 function hexToThreeColor(hex) {
   try {
@@ -11,8 +12,12 @@ function hexToThreeColor(hex) {
   }
 }
 
+
+
 function Room({ room }) {
   // cm -> meters for 3D
+  // generateRoomPolygon returns points in same units as input.
+  // We can pass w/h in meters directly.
   const w = room.width / 100
   const h = room.height / 100
   const wallH = 2.4
@@ -21,54 +26,92 @@ function Room({ room }) {
   const floorColor = useMemo(() => hexToThreeColor(room.color), [room.color])
   const wallColor = useMemo(() => hexToThreeColor(room.wallColor), [room.wallColor])
 
-  // L shape: we approximate by adding two floor panels. (keeps renderer simple & fast)
-  const isL = room.shape === 'L'
-  const cutW = w * 0.35
-  const cutH = h * 0.35
+  // Generate Geometric Shape
+  const shape = useMemo(() => {
+    const points = generateRoomPolygon(w, h, room.shape)
+    const s = new THREE.Shape()
+    if (points.length > 0) {
+      s.moveTo(points[0].x, points[0].y)
+      for (let i = 1; i < points.length; i++) {
+        s.lineTo(points[i].x, points[i].y)
+      }
+    }
+    return s
+  }, [w, h, room.shape])
+
+  // Generate Wall Shape (contour)
+  const wallSegments = useMemo(() => {
+    const points = generateRoomPolygon(w, h, room.shape)
+    const segments = []
+
+    // Find "front" z threshold to hide front walls.
+    // In 3D (x, z), the "front" is max Z (because in 2D it's max Y).
+    // Let's find the bounding box of the shape.
+    let maxZ = -Infinity
+    for (const p of points) maxZ = Math.max(maxZ, p.y)
+
+    for (let i = 0; i < points.length; i++) {
+      const p1 = points[i]
+      const p2 = points[(i + 1) % points.length]
+
+      const dx = p2.x - p1.x
+      const dy = p2.y - p1.y
+      const len = Math.sqrt(dx * dx + dy * dy)
+      const angle = Math.atan2(dy, dx)
+
+      // Midpoint of segment
+      const midZ = (p1.y + p2.y) / 2
+
+      // Determine if this is a "front" wall.
+      // If the segment is roughly horizontal (dy ~ 0) and at the very bottom (maxZ),
+      // or if it's the segment closing the shape at the bottom.
+      // Simple heuristic: if midZ is very close to maxZ, it's a front wall.
+      // Also check if angle indicates it's facing "out"?
+      // For rectangular/L shapes, the front wall is usually at the bottom.
+      // Let's filter out segments that are within a small threshold of maxZ.
+
+      const isFront = Math.abs(midZ - maxZ) < 0.1 // 10cm tolerance
+
+      if (!isFront) {
+        segments.push({
+          x: p1.x + dx / 2,
+          z: p1.y + dy / 2,
+          rot: -angle,
+          len: len
+        })
+      }
+    }
+    return segments
+  }, [w, h, room.shape])
 
   return (
-    <group>
-      {/* floor */}
-      {isL ? (
-        <group>
-          <mesh rotation-x={-Math.PI / 2} position={[0, 0, 0]} receiveShadow>
-            <planeGeometry args={[w - cutW, h]} />
-            <meshStandardMaterial color={floorColor} />
-          </mesh>
-          <mesh
-            rotation-x={-Math.PI / 2}
-            position={[((w - cutW) / 2 + (w - (w - cutW)) / 2) / 2, 0, -(h / 2 - cutH / 2)]}
-            receiveShadow
-          >
-            <planeGeometry args={[cutW, h - cutH]} />
-            <meshStandardMaterial color={floorColor} />
-          </mesh>
-        </group>
-      ) : (
-        <mesh rotation-x={-Math.PI / 2} receiveShadow>
-          <planeGeometry args={[w, h]} />
-          <meshStandardMaterial color={floorColor} />
+    <group position={[-w / 2, 0, -h / 2]}>
+      {/* Floor */}
+      <mesh rotation-x={-Math.PI / 2} receiveShadow>
+        <shapeGeometry args={[shape]} />
+        <meshStandardMaterial color={floorColor} side={THREE.DoubleSide} />
+      </mesh>
+
+      {/* Walls */}
+      {wallSegments.map((wg, i) => (
+        <mesh
+          key={i}
+          position={[wg.x, wallH / 2, wg.z]}
+          rotation-y={wg.rot}
+          receiveShadow
+          castShadow
+        >
+          {/* Wall thickness wallT. Height wallH. Length wg.len */}
+          {/* Add a bit of length to close corners? *1.05? or wallT? */}
+          <boxGeometry args={[wg.len + wallT, wallH, wallT]} />
+          <meshStandardMaterial color={wallColor} side={THREE.DoubleSide} />
         </mesh>
-      )}
+      ))}
 
-      {/* walls (3 walls) — one wall removed for visibility/performance */}
-      <mesh position={[0, wallH / 2, -h / 2]} receiveShadow castShadow>
-        <boxGeometry args={[w, wallH, wallT]} />
-        <meshStandardMaterial color={wallColor} />
-      </mesh>
-      <mesh position={[-w / 2, wallH / 2, 0]} receiveShadow castShadow>
-        <boxGeometry args={[wallT, wallH, h]} />
-        <meshStandardMaterial color={wallColor} />
-      </mesh>
-      <mesh position={[w / 2, wallH / 2, 0]} receiveShadow castShadow>
-        <boxGeometry args={[wallT, wallH, h]} />
-        <meshStandardMaterial color={wallColor} />
-      </mesh>
-
-      {/* subtle base */}
-      <mesh position={[0, -0.02, 0]} rotation-x={-Math.PI / 2} receiveShadow>
-        <planeGeometry args={[w + 1, h + 1]} />
-        <meshStandardMaterial color={new THREE.Color('#ffffff')} />
+      {/* Base - white outline underneath */}
+      <mesh position={[0, -0.05, 0]} rotation-x={-Math.PI / 2} receiveShadow>
+        <shapeGeometry args={[shape]} />
+        <meshStandardMaterial color={new THREE.Color('#fff')} side={THREE.DoubleSide} />
       </mesh>
     </group>
   )
@@ -106,6 +149,19 @@ function Furniture({ item }) {
       ) : null}
       {item.type === 'wardrobe' ? (
         <Wardrobe color={baseColor} shade={darker} dims={dims} />
+      ) : null}
+      {item.type === 'bookshelf' ? (
+        <Bookshelf color={baseColor} shade={darker} dims={dims} />
+      ) : null}
+      {item.type === 'plant' ? (
+        <Plant color={baseColor} shade={darker} dims={dims} />
+      ) : null}
+      {item.type === 'rug' ? <Rug color={baseColor} shade={darker} dims={dims} /> : null}
+      {item.type === 'tv_unit' ? (
+        <TVUnit color={baseColor} shade={darker} dims={dims} />
+      ) : null}
+      {item.type === 'window' ? (
+        <WindowItem color={baseColor} shade={darker} dims={dims} />
       ) : null}
     </group>
   )
@@ -303,8 +359,25 @@ export default function View3D({ room, items }) {
   const centeredItems = useMemo(() => {
     return items.map((it) => {
       // convert from cm (top-left) to meters (centered)
-      const x = it.x / 100 - w / 2 + (it.w * it.scale) / 200
-      const z = it.y / 100 - h / 2 + (it.h * it.scale) / 200
+      // We must account for rotation because x/y is the top-left of the group,
+      // but the 3D model is placed at the center.
+      // 2D Rotation is clockwise (y down).
+      const rot = (it.rotation * Math.PI) / 180
+      const wCm = it.w * it.scale
+      const hCm = it.h * it.scale
+
+      // Calculate center in 2D cm
+      // The offset to center is (w/2, h/2) rotated by rot
+      const ox = (wCm / 2)
+      const oy = (hCm / 2)
+      const rox = ox * Math.cos(rot) - oy * Math.sin(rot)
+      const roy = ox * Math.sin(rot) + oy * Math.cos(rot)
+
+      const cx = it.x + rox
+      const cy = it.y + roy
+
+      const x = cx / 100 - w / 2
+      const z = cy / 100 - h / 2
       return { ...it, _pos: [x, 0, z] }
     })
   }, [items, w, h])
@@ -333,5 +406,146 @@ export default function View3D({ room, items }) {
         <span className="muted">One wall removed for clear view (faster + easier).</span>
       </div>
     </div>
+  )
+}
+
+function Bookshelf({ color, shade, dims }) {
+  const w = Math.max(0.6, dims.w)
+  const d = Math.max(0.3, dims.d)
+  const H = 1.5
+
+  return (
+    <group>
+      {/* Frame */}
+      <mesh position={[0, H / 2, -d / 2 + 0.02]} castShadow receiveShadow>
+        <boxGeometry args={[w, H, 0.04]} />
+        <meshStandardMaterial color={shade} />
+      </mesh>
+      <mesh position={[-w / 2 + 0.02, H / 2, 0]} castShadow receiveShadow>
+        <boxGeometry args={[0.04, H, d]} />
+        <meshStandardMaterial color={shade} />
+      </mesh>
+      <mesh position={[w / 2 - 0.02, H / 2, 0]} castShadow receiveShadow>
+        <boxGeometry args={[0.04, H, d]} />
+        <meshStandardMaterial color={shade} />
+      </mesh>
+      {/* Shelves */}
+      {[0.1, 0.5, 0.9, 1.3].map((y) => (
+        <mesh key={y} position={[0, y, 0]} castShadow receiveShadow>
+          <boxGeometry args={[w - 0.08, 0.04, d - 0.02]} />
+          <meshStandardMaterial color={color} />
+        </mesh>
+      ))}
+    </group>
+  )
+}
+
+function Plant({ color, shade, dims }) {
+  const w = Math.max(0.3, dims.w)
+
+  return (
+    <group>
+      {/* Pot */}
+      <mesh position={[0, 0.2, 0]} castShadow receiveShadow>
+        <cylinderGeometry args={[w * 0.4, w * 0.3, 0.4, 16]} />
+        <meshStandardMaterial color={new THREE.Color('#d2691e')} />
+      </mesh>
+      {/* Plant */}
+      <mesh position={[0, 0.6, 0]} castShadow receiveShadow>
+        <dodecahedronGeometry args={[w * 0.5, 0]} />
+        <meshStandardMaterial color={color} />
+      </mesh>
+    </group>
+  )
+}
+
+function Rug({ color, shade, dims }) {
+  const w = Math.max(0.5, dims.w)
+  const d = Math.max(0.5, dims.d)
+
+  return (
+    <mesh position={[0, 0.01, 0]} receiveShadow rotation-x={-Math.PI / 2}>
+      <planeGeometry args={[w, d]} />
+      <meshStandardMaterial color={color} />
+    </mesh>
+  )
+}
+
+function TVUnit({ color, shade, dims }) {
+  const w = Math.max(1.0, dims.w)
+  const d = Math.max(0.4, dims.d)
+  const H = 0.45
+
+  return (
+    <group>
+      {/* Cabinet */}
+      <mesh position={[0, H / 2, 0]} castShadow receiveShadow>
+        <boxGeometry args={[w, H, d]} />
+        <meshStandardMaterial color={shade} />
+      </mesh>
+      {/* TV Screen */}
+      <mesh position={[0, H + 0.3, 0]} castShadow receiveShadow>
+        <boxGeometry args={[w * 0.8, 0.6, 0.05]} />
+        <meshStandardMaterial color={new THREE.Color('#111111')} roughness={0.2} />
+      </mesh>
+      {/* Stand */}
+      <mesh position={[0, H, 0]} castShadow receiveShadow>
+        <boxGeometry args={[w * 0.3, 0.1, 0.2]} />
+        <meshStandardMaterial color={new THREE.Color('#222')} />
+      </mesh>
+    </group>
+  )
+}
+
+function WindowItem({ color, shade, dims }) {
+  const w = Math.max(0.5, dims.w)
+  const H = 1.2
+  const y = 1.0 + H / 2
+  const t = 0.05 // frame thickness
+
+  return (
+    <group>
+      {/* Frame Top */}
+      <mesh position={[0, y + H / 2 - t / 2, 0]} castShadow receiveShadow>
+        <boxGeometry args={[w, t, 0.1]} />
+        <meshStandardMaterial color={new THREE.Color('#fff')} />
+      </mesh>
+      {/* Frame Bottom */}
+      <mesh position={[0, y - H / 2 + t / 2, 0]} castShadow receiveShadow>
+        <boxGeometry args={[w, t, 0.1]} />
+        <meshStandardMaterial color={new THREE.Color('#fff')} />
+      </mesh>
+      {/* Frame Left */}
+      <mesh position={[-w / 2 + t / 2, y, 0]} castShadow receiveShadow>
+        <boxGeometry args={[t, H - 2 * t, 0.1]} />
+        <meshStandardMaterial color={new THREE.Color('#fff')} />
+      </mesh>
+      {/* Frame Right */}
+      <mesh position={[w / 2 - t / 2, y, 0]} castShadow receiveShadow>
+        <boxGeometry args={[t, H - 2 * t, 0.1]} />
+        <meshStandardMaterial color={new THREE.Color('#fff')} />
+      </mesh>
+
+      {/* Cross Bars */}
+      <mesh position={[0, y, 0]} castShadow receiveShadow>
+        <boxGeometry args={[w - 2 * t, t / 1.5, 0.04]} />
+        <meshStandardMaterial color={new THREE.Color('#fff')} />
+      </mesh>
+      <mesh position={[0, y, 0]} castShadow receiveShadow>
+        <boxGeometry args={[t / 1.5, H - 2 * t, 0.04]} />
+        <meshStandardMaterial color={new THREE.Color('#fff')} />
+      </mesh>
+
+      {/* Glass */}
+      <mesh position={[0, y, 0]}>
+        <boxGeometry args={[w - 0.02, H - 0.02, 0.05]} />
+        <meshStandardMaterial
+          color={new THREE.Color('#aaddff')}
+          transparent
+          opacity={0.3}
+          roughness={0}
+        />
+      </mesh>
+    </group>
   )
 }
