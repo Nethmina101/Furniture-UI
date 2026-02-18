@@ -50,6 +50,14 @@ function iconFor(type) {
       return '📺'
     case 'window':
       return '🪟'
+    case 'lamp':
+      return '💡'
+    case 'coffee_table':
+      return '☕'
+    case 'ac':
+      return '❄️'
+    case 'pouf':
+      return '🧘'
     default:
       return '⬛'
   }

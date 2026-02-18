@@ -8,7 +8,6 @@ function roomPolygon(room, scale, pad) {
   const basePoints = generateRoomPolygon(room.width, room.height, room.shape)
 
   // Convert to flat array [rx, ry, rx, ry...] scaled and padded
-  // The utility returns relative to 0,0. We need to scale and add pad.
   const flat = []
   for (const p of basePoints) {
     flat.push(pad + p.x * scale)
@@ -31,8 +30,8 @@ export default function Canvas2D({ room, items, selectedId, onSelect, onChangeIt
     const ro = new ResizeObserver(() => {
       const r = el.getBoundingClientRect()
       setSize({
-        w: Math.max(520, Math.floor(r.width)),
-        h: Math.max(420, Math.floor(r.height))
+        w: Math.floor(r.width),
+        h: Math.floor(r.height)
       })
     })
     ro.observe(el)

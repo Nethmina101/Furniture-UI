@@ -78,98 +78,103 @@ export default function Designer() {
   }
 
   return (
-    <div className="designer">
-      <div className="designerLeft">
-        <div className="card" style={{ padding: 12 }}>
-          <div className="rowBetween" style={{ marginBottom: 8 }}>
-            <div>
-              <div className="sectionTitle">Workspace</div>
-              <div className="muted" style={{ fontSize: 12 }}>
-                Active: <strong>{active.room?.name}</strong>
+    <div className="designerRoot">
+      <div className="designerMain">
+        <div className="designerLeft">
+          <div className="card" style={{ padding: 12 }}>
+            <div className="rowBetween" style={{ marginBottom: 8 }}>
+              <div>
+                <div className="sectionTitle">Workspace</div>
+                <div className="muted" style={{ fontSize: 12 }}>
+                  Active: <strong>{active.room?.name}</strong>
+                </div>
+              </div>
+              <div className="rowEnd">
+                <button className={tab === '2D' ? 'btn btnPrimary' : 'btn'} onClick={() => setTab('2D')}>
+                  2D
+                </button>
+                <button className={tab === '3D' ? 'btn btnPrimary' : 'btn'} onClick={() => setTab('3D')}>
+                  3D
+                </button>
               </div>
             </div>
-            <div className="rowEnd">
-              <button className={tab === '2D' ? 'btn btnPrimary' : 'btn'} onClick={() => setTab('2D')}>
-                2D
+            <div className="row" style={{ flexWrap: 'wrap', gap: 8 }}>
+              <button
+                className="btn"
+                onClick={() => {
+                  const d = createDesign({})
+                  setActive(d.id)
+                }}
+              >
+                + New design
               </button>
-              <button className={tab === '3D' ? 'btn btnPrimary' : 'btn'} onClick={() => setTab('3D')}>
-                3D
-              </button>
+              <select
+                className="select"
+                value={active.id}
+                onChange={(e) => setActive(e.target.value)}
+              >
+                {designs.map((d) => (
+                  <option key={d.id} value={d.id}>
+                    {d.room?.name}
+                  </option>
+                ))}
+              </select>
             </div>
           </div>
-          <div className="row" style={{ flexWrap: 'wrap', gap: 8 }}>
-            <button
-              className="btn"
-              onClick={() => {
-                const d = createDesign({})
-                setActive(d.id)
-              }}
-            >
-              + New design
-            </button>
-            <select
-              className="select"
-              value={active.id}
-              onChange={(e) => setActive(e.target.value)}
-            >
-              {designs.map((d) => (
-                <option key={d.id} value={d.id}>
-                  {d.room?.name}
-                </option>
-              ))}
-            </select>
+
+          <RoomForm room={room} onChange={saveRoomPatch} />
+
+          <div className="card" style={{ padding: 12 }}>
+            <div className="sectionTitle">Actions</div>
+            <div className="row" style={{ flexWrap: 'wrap', gap: 8 }}>
+              <button className="btn" onClick={() => setSelectedId(null)}>
+                Clear selection
+              </button>
+              <button
+                className="btn"
+                onClick={() => {
+                  // quick auto-fit: bring all items within room bounds
+                  const next = items.map((it) => {
+                    const w = it.w * it.scale
+                    const h = it.h * it.scale
+                    return {
+                      ...it,
+                      x: Math.min(Math.max(0, it.x), Math.max(0, room.width - w)),
+                      y: Math.min(Math.max(0, it.y), Math.max(0, room.height - h))
+                    }
+                  })
+                  saveItems(next)
+                }}
+              >
+                Fit items in room
+              </button>
+            </div>
+            <div className="muted" style={{ marginTop: 8, fontSize: 12 }}>
+              Everything is saved automatically (LocalStorage) for fast demo.
+            </div>
           </div>
         </div>
 
-        <RoomForm room={room} onChange={saveRoomPatch} />
+        <div className="designerCenter">
+          {tab === '2D' ? (
+            <Canvas2D
+              room={room}
+              items={items}
+              selectedId={selectedId}
+              onSelect={setSelectedId}
+              onChangeItems={saveItems}
+            />
+          ) : (
+            <View3D room={room} items={items} />
+          )}
+        </div>
 
-        <div className="card" style={{ padding: 12 }}>
-          <div className="sectionTitle">Actions</div>
-          <div className="row" style={{ flexWrap: 'wrap', gap: 8 }}>
-            <button className="btn" onClick={() => setSelectedId(null)}>
-              Clear selection
-            </button>
-            <button
-              className="btn"
-              onClick={() => {
-                // quick auto-fit: bring all items within room bounds
-                const next = items.map((it) => {
-                  const w = it.w * it.scale
-                  const h = it.h * it.scale
-                  return {
-                    ...it,
-                    x: Math.min(Math.max(0, it.x), Math.max(0, room.width - w)),
-                    y: Math.min(Math.max(0, it.y), Math.max(0, room.height - h))
-                  }
-                })
-                saveItems(next)
-              }}
-            >
-              Fit items in room
-            </button>
-          </div>
-          <div className="muted" style={{ marginTop: 8, fontSize: 12 }}>
-            Everything is saved automatically (LocalStorage) for fast demo.
-          </div>
+        <div className="designerTools">
+          <FurniturePalette onAdd={addFurniture} />
         </div>
       </div>
 
-      <div className="designerCenter">
-        {tab === '2D' ? (
-          <Canvas2D
-            room={room}
-            items={items}
-            selectedId={selectedId}
-            onSelect={setSelectedId}
-            onChangeItems={saveItems}
-          />
-        ) : (
-          <View3D room={room} items={items} />
-        )}
-      </div>
-
-      <div className="designerTools">
-        <FurniturePalette onAdd={addFurniture} />
+      <div className="designerBottom">
         <SelectionInspector item={selected} onChange={patchSelected} onRemove={removeSelected} />
       </div>
     </div>
