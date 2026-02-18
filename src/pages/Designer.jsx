@@ -62,7 +62,7 @@ export default function Designer() {
     const x = Math.max(10, room.width / 2 - 60)
     const y = Math.max(10, room.height / 2 - 40)
     const it = makeItem(type, x, y)
-    saveItems([it, ...items])
+    saveItems([...items, it])
     setSelectedId(it.id)
   }
 

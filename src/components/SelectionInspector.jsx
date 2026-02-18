@@ -62,6 +62,15 @@ export default function SelectionInspector({ item, onChange, onRemove }) {
         />
       </label>
 
+      <label className="field">
+        <span>Elevation (cm)</span>
+        <input
+          type="number"
+          value={Math.round(item.elevation || 0)}
+          onChange={(e) => onChange({ elevation: Number(e.target.value) })}
+        />
+      </label>
+
       <div className="muted" style={{ fontSize: 12 }}>
         Shade affects the drop-shadow in 2D and ambient darkening in 3D.
       </div>

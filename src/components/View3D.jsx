@@ -27,8 +27,15 @@ function Room({ room }) {
   const wallColor = useMemo(() => hexToThreeColor(room.wallColor), [room.wallColor])
 
   // Generate Geometric Shape
+  // We use positive Y from generateRoomPolygon.
+  // In 2D, Y is Down. In 3D, we want Y -> Z (Front).
+  // Standard X-Z plane: +Z is Front.
+  // So we map 2D(x, y) -> 3D(x, 0, y).
+  const points = useMemo(() => {
+    return generateRoomPolygon(w, h, room.shape)
+  }, [w, h, room.shape])
+
   const shape = useMemo(() => {
-    const points = generateRoomPolygon(w, h, room.shape)
     const s = new THREE.Shape()
     if (points.length > 0) {
       s.moveTo(points[0].x, points[0].y)
@@ -37,16 +44,14 @@ function Room({ room }) {
       }
     }
     return s
-  }, [w, h, room.shape])
+  }, [points])
 
   // Generate Wall Shape (contour)
   const wallSegments = useMemo(() => {
-    const points = generateRoomPolygon(w, h, room.shape)
     const segments = []
 
     // Find "front" z threshold to hide front walls.
-    // In 3D (x, z), the "front" is max Z (because in 2D it's max Y).
-    // Let's find the bounding box of the shape.
+    // We are mapping y -> z directly. Front is Max Y.
     let maxZ = -Infinity
     for (const p of points) maxZ = Math.max(maxZ, p.y)
 
@@ -59,35 +64,27 @@ function Room({ room }) {
       const len = Math.sqrt(dx * dx + dy * dy)
       const angle = Math.atan2(dy, dx)
 
-      // Midpoint of segment
       const midZ = (p1.y + p2.y) / 2
 
-      // Determine if this is a "front" wall.
-      // If the segment is roughly horizontal (dy ~ 0) and at the very bottom (maxZ),
-      // or if it's the segment closing the shape at the bottom.
-      // Simple heuristic: if midZ is very close to maxZ, it's a front wall.
-      // Also check if angle indicates it's facing "out"?
-      // For rectangular/L shapes, the front wall is usually at the bottom.
-      // Let's filter out segments that are within a small threshold of maxZ.
-
-      const isFront = Math.abs(midZ - maxZ) < 0.1 // 10cm tolerance
+      // Hide front walls
+      const isFront = Math.abs(midZ - maxZ) < 0.1
 
       if (!isFront) {
         segments.push({
           x: p1.x + dx / 2,
-          z: p1.y + dy / 2,
+          z: p1.y + dy / 2, // Map y directly to z
           rot: -angle,
           len: len
         })
       }
     }
     return segments
-  }, [w, h, room.shape])
+  }, [points])
 
   return (
     <group position={[-w / 2, 0, -h / 2]}>
-      {/* Floor */}
-      <mesh rotation-x={-Math.PI / 2} receiveShadow>
+      {/* Floor - Rotation X +90 to map Y to Z */}
+      <mesh rotation-x={Math.PI / 2} receiveShadow>
         <shapeGeometry args={[shape]} />
         <meshStandardMaterial color={floorColor} side={THREE.DoubleSide} />
       </mesh>
@@ -109,7 +106,7 @@ function Room({ room }) {
       ))}
 
       {/* Base - white outline underneath */}
-      <mesh position={[0, -0.05, 0]} rotation-x={-Math.PI / 2} receiveShadow>
+      <mesh position={[0, -0.05, 0]} rotation-x={Math.PI / 2} receiveShadow>
         <shapeGeometry args={[shape]} />
         <meshStandardMaterial color={new THREE.Color('#fff')} side={THREE.DoubleSide} />
       </mesh>
@@ -162,6 +159,18 @@ function Furniture({ item }) {
       ) : null}
       {item.type === 'window' ? (
         <WindowItem color={baseColor} shade={darker} dims={dims} />
+      ) : null}
+      {item.type === 'lamp' ? (
+        <FloorLamp color={baseColor} shade={darker} dims={dims} />
+      ) : null}
+      {item.type === 'coffee_table' ? (
+        <CoffeeTable color={baseColor} shade={darker} dims={dims} />
+      ) : null}
+      {item.type === 'ac' ? (
+        <ACUnit color={baseColor} shade={darker} dims={dims} />
+      ) : null}
+      {item.type === 'pouf' ? (
+        <Pouf color={baseColor} shade={darker} dims={dims} />
       ) : null}
     </group>
   )
@@ -378,7 +387,8 @@ export default function View3D({ room, items }) {
 
       const x = cx / 100 - w / 2
       const z = cy / 100 - h / 2
-      return { ...it, _pos: [x, 0, z] }
+      const y = (it.elevation || 0) / 100
+      return { ...it, _pos: [x, y, z] }
     })
   }, [items, w, h])
 
@@ -545,6 +555,100 @@ function WindowItem({ color, shade, dims }) {
           opacity={0.3}
           roughness={0}
         />
+      </mesh>
+    </group>
+  )
+}
+
+function FloorLamp({ color, shade, dims }) {
+  const H = 1.6
+  return (
+    <group>
+      {/* Base */}
+      <mesh position={[0, 0.02, 0]} castShadow receiveShadow>
+        <cylinderGeometry args={[0.15, 0.15, 0.04, 32]} />
+        <meshStandardMaterial color={shade} />
+      </mesh>
+      {/* Pole */}
+      <mesh position={[0, H / 2, 0]} castShadow>
+        <cylinderGeometry args={[0.02, 0.02, H, 12]} />
+        <meshStandardMaterial color={new THREE.Color('#444')} />
+      </mesh>
+      {/* Shade */}
+      <mesh position={[0, H - 0.2, 0]} castShadow>
+        <cylinderGeometry args={[0.2, 0.25, 0.3, 32, 1, true]} />
+        <meshStandardMaterial color={color} side={THREE.DoubleSide} />
+      </mesh>
+      {/* Bulb Light */}
+      <pointLight position={[0, H - 0.2, 0]} intensity={0.5} distance={3} decay={2} />
+    </group>
+  )
+}
+
+function CoffeeTable({ color, shade, dims }) {
+  const w = Math.max(0.6, dims.w)
+  // Use width as diameter (average of w and d?)
+  // Or just use w for radius? Let's use w/2.
+  const r = w / 2
+  const H = 0.4
+  const t = 0.05
+
+  return (
+    <group>
+      <mesh position={[0, H, 0]} castShadow receiveShadow>
+        <cylinderGeometry args={[r, r, t, 32]} />
+        <meshStandardMaterial color={color} />
+      </mesh>
+      {/* Legs - 3 legs? or 4 legs rotated? */}
+      {[0, (2 * Math.PI) / 3, (4 * Math.PI) / 3].map((angle) => {
+        const lx = (r - 0.1) * Math.cos(angle)
+        const lz = (r - 0.1) * Math.sin(angle)
+        return (
+          <mesh key={angle} position={[lx, H / 2, lz]} castShadow>
+            <cylinderGeometry args={[0.03, 0.02, H, 8]} />
+            <meshStandardMaterial color={shade} />
+          </mesh>
+        )
+      })}
+    </group>
+  )
+}
+
+function ACUnit({ color, shade, dims }) {
+  const w = Math.max(0.8, dims.w)
+  const d = 0.2
+  const H = 0.25
+  return (
+    <group>
+      <mesh position={[0, H / 2, 0]} castShadow receiveShadow>
+        <boxGeometry args={[w, H, d]} />
+        <meshStandardMaterial color={color} />
+      </mesh>
+      {/* Vents */}
+      <mesh position={[0, 0.05, d / 2 + 0.001]} castShadow>
+        <planeGeometry args={[w * 0.8, 0.05]} />
+        <meshStandardMaterial color={new THREE.Color('#ddd')} />
+      </mesh>
+    </group>
+  )
+}
+
+function Pouf({ color, shade, dims }) {
+  const w = Math.max(0.4, dims.w)
+  const r = w / 2
+  const H = 0.45
+
+  return (
+    <group>
+      {/* Main Body */}
+      <mesh position={[0, H / 2, 0]} castShadow receiveShadow>
+        <cylinderGeometry args={[r, r, H, 24]} />
+        <meshStandardMaterial color={color} />
+      </mesh>
+      {/* Top Cap */}
+      <mesh position={[0, H, 0]} castShadow receiveShadow>
+        <cylinderGeometry args={[r * 0.95, r, 0.05, 24]} />
+        <meshStandardMaterial color={shade} />
       </mesh>
     </group>
   )

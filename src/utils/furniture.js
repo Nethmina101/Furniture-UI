@@ -58,6 +58,30 @@ export const furnitureCatalog = [
     label: 'Window',
     footprint: { w: 100, h: 15 },
     color: '#aaddff'
+  },
+  {
+    type: 'lamp',
+    label: 'Floor Lamp',
+    footprint: { w: 40, h: 40 },
+    color: '#f5deb3'
+  },
+  {
+    type: 'coffee_table',
+    label: 'Coffee Table',
+    footprint: { w: 90, h: 50 },
+    color: '#8b4513'
+  },
+  {
+    type: 'ac',
+    label: 'AC Unit',
+    footprint: { w: 80, h: 25 },
+    color: '#ffffff'
+  },
+  {
+    type: 'pouf',
+    label: 'Pouf',
+    footprint: { w: 45, h: 45 },
+    color: '#e0c0a0'
   }
 ]
 
@@ -76,6 +100,7 @@ export function makeItem(type, x, y) {
     rotation: 0,
     color: def.color,
     shade: 0.15, // 0..0.8
+    elevation: def.type === 'ac' ? 200 : 0, // Default 200cm for AC, 0 for others
     scale: 1
   }
 }
