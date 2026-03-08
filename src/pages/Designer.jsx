@@ -81,19 +81,26 @@ export default function Designer() {
     <div className="designerRoot">
       <div className="designerMain">
         <div className="designerLeft">
-          <div className="card" style={{ padding: 12 }}>
-            <div className="rowBetween" style={{ marginBottom: 8 }}>
+          {/* ─── Workspace + View Toggle ─── */}
+          <div className="card" style={{ padding: 14 }}>
+            <div className="rowBetween" style={{ marginBottom: 10 }}>
               <div>
-                <div className="sectionTitle">Workspace</div>
+                <div className="sectionTitle" style={{ marginBottom: 4 }}>Workspace</div>
                 <div className="muted" style={{ fontSize: 12 }}>
                   Active: <strong>{active.room?.name}</strong>
                 </div>
               </div>
-              <div className="rowEnd">
-                <button className={tab === '2D' ? 'btn btnPrimary' : 'btn'} onClick={() => setTab('2D')}>
+              <div className="viewToggle">
+                <button
+                  className={`viewToggleBtn ${tab === '2D' ? 'viewToggleBtnActive' : ''}`}
+                  onClick={() => setTab('2D')}
+                >
                   2D
                 </button>
-                <button className={tab === '3D' ? 'btn btnPrimary' : 'btn'} onClick={() => setTab('3D')}>
+                <button
+                  className={`viewToggleBtn ${tab === '3D' ? 'viewToggleBtnActive' : ''}`}
+                  onClick={() => setTab('3D')}
+                >
                   3D
                 </button>
               </div>
@@ -112,6 +119,7 @@ export default function Designer() {
                 className="select"
                 value={active.id}
                 onChange={(e) => setActive(e.target.value)}
+                style={{ flex: 1 }}
               >
                 {designs.map((d) => (
                   <option key={d.id} value={d.id}>
@@ -122,8 +130,9 @@ export default function Designer() {
             </div>
           </div>
 
-          <div className="card" style={{ padding: 12 }}>
-            <div className="sectionTitle">Visuals</div>
+          {/* ─── Visuals ─── */}
+          <div className="card" style={{ padding: 14 }}>
+            <div className="sectionTitle" style={{ marginBottom: 8 }}>Visuals</div>
             <div className="grid2" style={{ gap: 8 }}>
               <label className="field">
                 <span>Time of Day</span>
@@ -135,8 +144,8 @@ export default function Designer() {
                     saveRoomPatch({ lighting: { ...l, preset: e.target.value } })
                   }}
                 >
-                  <option value="Day">Day</option>
-                  <option value="Night">Night</option>
+                  <option value="Day">☀️ Day</option>
+                  <option value="Night">🌙 Night</option>
                 </select>
               </label>
               <label className="field">
@@ -156,25 +165,22 @@ export default function Designer() {
             </div>
           </div>
 
+          {/* ─── Room Settings ─── */}
           <RoomForm room={room} onChange={saveRoomPatch} />
 
-          <div className="card" style={{ padding: 12 }}>
-            <button
-              className="btn btnDanger"
-              style={{ width: '100%', backgroundColor: 'rgba(255, 77, 79, 0.1)', color: '#ff4d4f', border: '1px solid #ff4d4f' }}
-              onClick={() => {
-                if (window.confirm('Are you sure you want to remove all furniture from this room?')) {
-                  saveItems([])
-                  setSelectedId(null)
-                }
-              }}
-            >
-              Clear Room Items
-            </button>
-            <div className="muted" style={{ marginTop: 8, fontSize: 12, textAlign: 'center' }}>
-              Everything is saved automatically.
-            </div>
-          </div>
+          {/* ─── Clear Button ─── */}
+          <button
+            className="btn btnDanger"
+            style={{ width: '100%', padding: '12px 14px' }}
+            onClick={() => {
+              if (window.confirm('Are you sure you want to remove all furniture from this room?')) {
+                saveItems([])
+                setSelectedId(null)
+              }
+            }}
+          >
+            🗑️ Clear Room Items
+          </button>
         </div>
 
         <div className="designerCenter">
@@ -193,11 +199,8 @@ export default function Designer() {
 
         <div className="designerTools">
           <FurniturePalette onAdd={addFurniture} />
+          <SelectionInspector item={selected} onChange={patchSelected} onRemove={removeSelected} />
         </div>
-      </div>
-
-      <div className="designerBottom">
-        <SelectionInspector item={selected} onChange={patchSelected} onRemove={removeSelected} />
       </div>
     </div>
   )

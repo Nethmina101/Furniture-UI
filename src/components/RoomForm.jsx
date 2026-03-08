@@ -2,14 +2,15 @@ import React from 'react'
 
 export default function RoomForm({ room, onChange }) {
   return (
-    <div className="card" style={{ padding: 12 }}>
-      <div className="sectionTitle">Room</div>
+    <div className="card" style={{ padding: 14 }}>
+      <div className="sectionTitle" style={{ marginBottom: 8 }}>Room</div>
 
-      <label className="field">
+      <label className="field" style={{ marginTop: 0 }}>
         <span>Name</span>
         <input
           value={room.name}
           onChange={(e) => onChange({ name: e.target.value })}
+          placeholder="e.g. Living Room"
         />
       </label>
 
@@ -36,22 +37,23 @@ export default function RoomForm({ room, onChange }) {
         </label>
       </div>
 
+      <label className="field">
+        <span>Shape</span>
+        <select
+          value={room.shape}
+          onChange={(e) => onChange({ shape: e.target.value })}
+        >
+          <option value="RECT">Rectangle</option>
+          <option value="L">L-Shape (Top-Right)</option>
+          <option value="L_REV">L-Shape (Top-Left)</option>
+          <option value="U">U-Shape</option>
+          <option value="CIRCLE">Circle</option>
+          <option value="OVAL">Oval</option>
+          <option value="SEMICIRCLE">Semi-Circle</option>
+        </select>
+      </label>
+
       <div className="grid2" style={{ gap: 8 }}>
-        <label className="field">
-          <span>Shape</span>
-          <select
-            value={room.shape}
-            onChange={(e) => onChange({ shape: e.target.value })}
-          >
-            <option value="RECT">Rectangle</option>
-            <option value="L">L-Shape (Top-Right)</option>
-            <option value="L_REV">L-Shape (Top-Left)</option>
-            <option value="U">U-Shape</option>
-            <option value="CIRCLE">Circle</option>
-            <option value="OVAL">Oval</option>
-            <option value="SEMICIRCLE">Semi-Circle</option>
-          </select>
-        </label>
         <label className="field">
           <span>Wall colour</span>
           <input
@@ -60,20 +62,16 @@ export default function RoomForm({ room, onChange }) {
             onChange={(e) => onChange({ wallColor: e.target.value })}
           />
         </label>
+        <label className="field">
+          <span>Floor colour</span>
+          <input
+            type="color"
+            value={room.color}
+            onChange={(e) => onChange({ color: e.target.value })}
+          />
+        </label>
       </div>
 
-      <label className="field">
-        <span>Floor colour</span>
-        <input
-          type="color"
-          value={room.color}
-          onChange={(e) => onChange({ color: e.target.value })}
-        />
-      </label>
-
-      <div className="callout" style={{ marginTop: 10 }}>
-        Uses centimetres for realism, but the planner scales automatically.
-      </div>
     </div>
   )
 }

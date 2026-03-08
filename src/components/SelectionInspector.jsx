@@ -3,19 +3,24 @@ import React from 'react'
 export default function SelectionInspector({ item, onChange, onRemove }) {
   if (!item) {
     return (
-      <div className="card" style={{ padding: 12 }}>
-        <div className="sectionTitle">Selected item</div>
-        <div className="muted">Click a furniture item in 2D to edit it.</div>
+      <div className="card" style={{ padding: 14 }}>
+        <div className="sectionTitle" style={{ marginBottom: 6 }}>Selected Item</div>
+        <div className="muted" style={{ fontSize: 12 }}>Click a furniture item in 2D to edit it.</div>
       </div>
     )
   }
 
+  const typeName = item.type.replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase())
+
   return (
-    <div className="card" style={{ padding: 12 }}>
-      <div className="rowBetween">
-        <div className="sectionTitle">Selected: {item.type}</div>
-        <button className="btn btnDanger" onClick={onRemove}>
-          Remove
+    <div className="card" style={{ padding: 14 }}>
+      <div className="rowBetween" style={{ marginBottom: 8 }}>
+        <div>
+          <div className="sectionTitle" style={{ marginBottom: 2 }}>{typeName}</div>
+          <div className="muted" style={{ fontSize: 11 }}>Edit properties below</div>
+        </div>
+        <button className="btn btnDanger" style={{ padding: '6px 12px', fontSize: 12 }} onClick={onRemove}>
+          🗑️ Remove
         </button>
       </div>
 
@@ -51,7 +56,7 @@ export default function SelectionInspector({ item, onChange, onRemove }) {
       </label>
 
       <label className="field">
-        <span>Shade</span>
+        <span>Shade: {Math.round(item.shade * 100)}%</span>
         <input
           type="range"
           min={0}
@@ -70,10 +75,6 @@ export default function SelectionInspector({ item, onChange, onRemove }) {
           onChange={(e) => onChange({ elevation: Number(e.target.value) })}
         />
       </label>
-
-      <div className="muted" style={{ fontSize: 12 }}>
-        Shade affects the drop-shadow in 2D and ambient darkening in 3D.
-      </div>
     </div>
   )
 }

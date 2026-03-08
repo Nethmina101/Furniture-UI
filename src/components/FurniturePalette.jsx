@@ -5,28 +5,38 @@ export default function FurniturePalette({ onAdd }) {
   const [openCategory, setOpenCategory] = useState('Living Room')
 
   return (
-    <div className="card" style={{ padding: 12, height: '100%', display: 'flex', flexDirection: 'column' }}>
-      <div className="sectionTitle">Furniture</div>
+    <div className="card" style={{ padding: 14, height: '100%', display: 'flex', flexDirection: 'column' }}>
+      <div className="sectionTitle" style={{ marginBottom: 8 }}>Furniture</div>
       <div className="categories" style={{ overflowY: 'auto', flex: 1, paddingRight: 4 }}>
         {furnitureCategories.map((c) => (
           <div key={c.category} className="categoryGroup" style={{ marginBottom: 4 }}>
             <button
-              className="btn"
+              className="categoryBtn"
               style={{
                 width: '100%',
                 textAlign: 'left',
                 display: 'flex',
                 justifyContent: 'space-between',
+                alignItems: 'center',
                 padding: '8px 12px',
-                backgroundColor: openCategory === c.category ? 'rgba(255, 255, 255, 0.1)' : 'transparent',
-                border: '1px solid rgba(255,255,255,0.1)',
-                fontWeight: openCategory === c.category ? 'bold' : 'normal',
-                marginBottom: openCategory === c.category ? 8 : 4
+                borderRadius: 10,
+                backgroundColor: openCategory === c.category ? 'rgba(110, 231, 183, 0.08)' : 'transparent',
+                border: openCategory === c.category
+                  ? '1px solid rgba(110, 231, 183, 0.18)'
+                  : '1px solid rgba(255,255,255,0.06)',
+                color: openCategory === c.category ? 'var(--accent)' : 'var(--text)',
+                fontWeight: openCategory === c.category ? 700 : 500,
+                fontSize: 13,
+                cursor: 'pointer',
+                transition: 'all 0.2s ease',
+                marginBottom: openCategory === c.category ? 8 : 4,
               }}
               onClick={() => setOpenCategory(openCategory === c.category ? null : c.category)}
             >
               <span>{c.category}</span>
-              <span>{openCategory === c.category ? '▼' : '▶'}</span>
+              <span style={{ fontSize: 10, opacity: 0.6 }}>
+                {openCategory === c.category ? '▼' : '▶'}
+              </span>
             </button>
             {openCategory === c.category && (
               <div className="palette" style={{ paddingBottom: 8 }}>
@@ -34,7 +44,6 @@ export default function FurniturePalette({ onAdd }) {
                   <button
                     key={f.type}
                     className="paletteItem"
-                    style={{ color: 'white' }}
                     onClick={() => onAdd(f.type)}
                     title={`Add ${f.label}`}
                   >
@@ -48,9 +57,6 @@ export default function FurniturePalette({ onAdd }) {
             )}
           </div>
         ))}
-      </div>
-      <div className="muted" style={{ marginTop: 10, fontSize: 12, flexShrink: 0 }}>
-        Tip: Add items then drag, resize and rotate them in the 2D plan.
       </div>
     </div>
   )

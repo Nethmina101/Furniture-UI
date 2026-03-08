@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useState } from 'react'
 import { NavLink, Outlet, useNavigate } from 'react-router-dom'
 import { useAuth } from '../store/useAuth'
 
@@ -20,10 +20,18 @@ export default function AppShell() {
   const { user, logout } = useAuth()
   const nav = useNavigate()
   const isAdmin = user?.role === 'admin'
+  const [collapsed, setCollapsed] = useState(false)
 
   return (
     <div className="app">
-      <aside className="sidebar">
+      <aside className={`sidebar ${collapsed ? 'collapsed' : ''}`}>
+        <button
+          className="toggleSidebarBtn"
+          onClick={() => setCollapsed(!collapsed)}
+          title={collapsed ? "Expand sidebar" : "Collapse sidebar"}
+        >
+          {collapsed ? '▶' : '◀'}
+        </button>
         <div className="brand">
           <div className="brandMark">FD</div>
           <div>
@@ -67,7 +75,8 @@ export default function AppShell() {
               nav('/login')
             }}
           >
-            Log out
+            <span>🚪</span>
+            <span className="logoutLabel" style={{ marginLeft: 8 }}>Log out</span>
           </button>
         </div>
       </aside>

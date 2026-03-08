@@ -127,7 +127,7 @@ function Room({ room }) {
 }
 
 // ─── Furniture dispatcher ────────────────────────────────────────
-function Furniture({ item }) {
+function Furniture({ item, preset }) {
   const x = item.x / 100
   const z = item.y / 100
   const rot = (item.rotation * Math.PI) / 180
@@ -156,7 +156,7 @@ function Furniture({ item }) {
       {['tv_unit'].includes(item.type) && <TVUnit color={baseColor} shade={shade} dims={dims} />}
       {['sideboard', 'dresser', 'shoe_storage'].includes(item.type) && <Sideboard color={baseColor} shade={shade} dims={dims} />}
       {item.type === 'window' && <WindowItem color={baseColor} shade={shade} dims={dims} />}
-      {item.type === 'lamp' && <FloorLamp color={baseColor} shade={shade} dims={dims} />}
+      {item.type === 'lamp' && <FloorLamp color={baseColor} shade={shade} dims={dims} preset={preset} />}
       {item.type === 'coffee_table' && <CoffeeTable color={baseColor} shade={shade} dims={dims} />}
       {item.type === 'ac' && <ACUnit color={baseColor} shade={shade} dims={dims} />}
       {['pouf', 'ottoman'].includes(item.type) && <Pouf color={baseColor} shade={shade} dims={dims} isBench={false} />}
@@ -559,7 +559,7 @@ function WindowItem({ color, shade, dims }) {
 }
 
 // ─── Floor Lamp ──────────────────────────────────────────────────
-function FloorLamp({ color, shade, dims }) {
+function FloorLamp({ color, shade, dims, preset }) {
   const H = 1.65
   return (
     <group>
@@ -590,14 +590,14 @@ function FloorLamp({ color, shade, dims }) {
           color={new THREE.Color('#ffe8c0')}
           side={THREE.BackSide}
           emissive={new THREE.Color('#ffe0a0')}
-          emissiveIntensity={0.5}
+          emissiveIntensity={preset === 'Day' ? 0 : 0.5}
           transparent opacity={0.7}
         />
       </mesh>
       {/* Point light */}
       <pointLight
         position={[0, H - 0.2, 0]}
-        intensity={2.2}
+        intensity={preset === 'Day' ? 0 : 2.2}
         distance={5.5}
         decay={2}
         color="#ffeedd"
@@ -771,7 +771,7 @@ export default function View3D({ room, items }) {
   const { intensity, preset } = lighting
 
   const presets = {
-    Day: { ambient: 0.55, dir: 1.1, color: '#fff9f0', sky: 'apartment', bg: '#dce8f0' },
+    Day: { ambient: 0.55, dir: 1.1, color: '#fff9f0', sky: 'apartment', bg: '#b0bcc2' },
     Night: { ambient: 0.15, dir: 0.35, color: '#88aaff', sky: 'night', bg: '#050a14' },
     Sunset: { ambient: 0.4, dir: 0.9, color: '#ffbb88', sky: 'sunset', bg: '#1a0d05' },
   }
@@ -850,7 +850,7 @@ export default function View3D({ room, items }) {
 
         {centeredItems.map((it) => (
           <group key={it.id} position={it._pos}>
-            <Furniture item={it} />
+            <Furniture item={it} preset={preset} />
           </group>
         ))}
 
