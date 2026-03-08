@@ -122,6 +122,40 @@ export default function Designer() {
             </div>
           </div>
 
+          <div className="card" style={{ padding: 12 }}>
+            <div className="sectionTitle">Visuals</div>
+            <div className="grid2" style={{ gap: 8 }}>
+              <label className="field">
+                <span>Time of Day</span>
+                <select
+                  className="select"
+                  value={room.lighting?.preset || 'Day'}
+                  onChange={(e) => {
+                    const l = room.lighting || { intensity: 1, preset: 'Day' }
+                    saveRoomPatch({ lighting: { ...l, preset: e.target.value } })
+                  }}
+                >
+                  <option value="Day">Day</option>
+                  <option value="Night">Night</option>
+                </select>
+              </label>
+              <label className="field">
+                <span>Brightness: {Math.round((room.lighting?.intensity ?? 1) * 100)}%</span>
+                <input
+                  type="range"
+                  min={0}
+                  max={2}
+                  step={0.1}
+                  value={room.lighting?.intensity ?? 1}
+                  onChange={(e) => {
+                    const l = room.lighting || { intensity: 1, preset: 'Day' }
+                    saveRoomPatch({ lighting: { ...l, intensity: parseFloat(e.target.value) } })
+                  }}
+                />
+              </label>
+            </div>
+          </div>
+
           <RoomForm room={room} onChange={saveRoomPatch} />
 
           <div className="card" style={{ padding: 12 }}>

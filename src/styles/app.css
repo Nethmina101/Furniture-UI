@@ -292,6 +292,11 @@ select {
   outline: none;
 }
 
+option {
+  background-color: var(--card);
+  color: var(--text);
+}
+
 .select {
   padding: 10px 12px;
   border-radius: 12px;

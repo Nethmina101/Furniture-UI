@@ -100,7 +100,7 @@ export function makeItem(type, x, y) {
     rotation: 0,
     color: def.color,
     shade: 0.15, // 0..0.8
-    elevation: def.type === 'ac' ? 200 : 0, // Default 200cm for AC, 0 for others
+    elevation: 0, // Default to 0 for all items
     scale: 1
   }
 }

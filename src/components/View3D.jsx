@@ -133,7 +133,7 @@ function Furniture({ item }) {
   }
 
   return (
-    <group rotation-y={-rot}>
+    <group rotation-y={-rot} scale={[1, item._scaleY || 1, 1]}>
       {item.type === 'chair' ? (
         <Chair color={baseColor} shade={darker} dims={dims} />
       ) : null}
@@ -359,44 +359,71 @@ export default function View3D({ room, items }) {
   const w = room.width / 100
   const h = room.height / 100
 
-  // Convert 2D item coordinates (px in planner) into 3D meters within room:
-  // In 2D we store in pixels directly; however we set x/y in 2D as pixels.
-  // For 3D we interpret x/y as "planner units" scaled to cm by reverse mapping.
-  // To keep consistent, Designer page stores items in cm positions instead of px.
-  // (See Designer.jsx) so here x/y are cm. Great.
+  // Lighting Configuration
+  const lighting = room.lighting || { intensity: 1.0, preset: 'Day' }
+  const { intensity, preset } = lighting
 
+  // Presets
+  const presets = {
+    Day: { ambient: 0.6, directional: 1.0, color: '#ffffff', sky: 'city' },
+    Night: { ambient: 0.2, directional: 0.4, color: '#aaccff', sky: 'night' }
+  }
+  const p = presets[preset] || presets.Day
+  const globalInt = intensity
+
+  // Convert 2D item coordinates (px in planner) into 3D meters within room
   const centeredItems = useMemo(() => {
     return items.map((it) => {
-      // convert from cm (top-left) to meters (centered)
-      // We must account for rotation because x/y is the top-left of the group,
-      // but the 3D model is placed at the center.
       // 2D Rotation is clockwise (y down).
       const rot = (it.rotation * Math.PI) / 180
       const wCm = it.w * it.scale
       const hCm = it.h * it.scale
 
-      // Calculate center in 2D cm
-      // The offset to center is (w/2, h/2) rotated by rot
+      // Calculate center in 2D cm. The offset to center is (w/2, h/2) rotated by rot
       const ox = (wCm / 2)
       const oy = (hCm / 2)
+
+      // Rotate offset around (0,0)
       const rox = ox * Math.cos(rot) - oy * Math.sin(rot)
       const roy = ox * Math.sin(rot) + oy * Math.cos(rot)
 
+      // Add rotated offset to top-left position
       const cx = it.x + rox
       const cy = it.y + roy
 
+      // Map to 3D: x -> x, y -> z. Centered on room origin (w/2, h/2)
       const x = cx / 100 - w / 2
       const z = cy / 100 - h / 2
-      const y = (it.elevation || 0) / 100
-      return { ...it, _pos: [x, y, z] }
+
+      const rawElevation = (it.elevation || 0) / 100
+
+      // Since "Height" is used to stretch/squash items now, we scale on the Y axis.
+      // 0 elevation = 1 scale, 25 = 1.25 scale, -25 = 0.75 scale.
+      const scaleY = Math.max(0.1, 1 + rawElevation)
+
+      // Keep the item firmly on the floor instead of hovering
+      const y = 0
+
+      return { ...it, _pos: [x, y, z], _scaleY: scaleY }
     })
   }, [items, w, h])
 
   return (
     <div className="canvas3dWrap">
       <Canvas shadows camera={{ position: [2.8, 2.2, 2.8], fov: 45 }}>
-        <ambientLight intensity={0.6} />
-        <directionalLight position={[5, 6, 3]} intensity={1.0} castShadow />
+        <ambientLight intensity={p.ambient * globalInt} />
+        <directionalLight
+          position={[5, 6, 3]}
+          intensity={p.directional * globalInt}
+          castShadow
+          color={p.color}
+          shadow-mapSize={[1024, 1024]}
+        >
+          <orthographicCamera attach="shadow-camera" args={[-10, 10, 10, -10]} />
+        </directionalLight>
+
+        {/* Dynamic Background Color based on preset */}
+        <color attach="background" args={[preset === 'Night' ? '#050a14' : '#f0f4f8']} />
 
         <Room room={room} />
 
@@ -407,13 +434,13 @@ export default function View3D({ room, items }) {
         ))}
 
         <ContactShadows position={[0, 0.01, 0]} scale={10} blur={2.5} opacity={0.35} />
-        <Environment preset="city" />
+        <Environment preset={p.sky} />
         <OrbitControls makeDefault />
       </Canvas>
 
       <div className="canvasLegend">
-        <span className="chip">3D Preview</span>
-        <span className="muted">One wall removed for clear view (faster + easier).</span>
+        <span className="chip">3D Preview: {preset}</span>
+        <span className="muted">Left Click to rotate. Right Click to pan. Scroll to zoom.</span>
       </div>
     </div>
   )
@@ -577,10 +604,19 @@ function FloorLamp({ color, shade, dims }) {
       {/* Shade */}
       <mesh position={[0, H - 0.2, 0]} castShadow>
         <cylinderGeometry args={[0.2, 0.25, 0.3, 32, 1, true]} />
-        <meshStandardMaterial color={color} side={THREE.DoubleSide} />
+        <meshStandardMaterial color={color} side={THREE.DoubleSide} transparent opacity={0.9} />
       </mesh>
-      {/* Bulb Light */}
-      <pointLight position={[0, H - 0.2, 0]} intensity={0.5} distance={3} decay={2} />
+      {/* Light Source - Adjusted bias/map size to fix banding artifacts */}
+      <pointLight
+        position={[0, H - 0.2, 0]}
+        intensity={2.0}
+        distance={5}
+        decay={2}
+        color="#ffeedd"
+        castShadow
+        shadow-bias={-0.0005}
+        shadow-mapSize={[512, 512]}
+      />
     </group>
   )
 }
@@ -618,8 +654,9 @@ function ACUnit({ color, shade, dims }) {
   const w = Math.max(0.8, dims.w)
   const d = 0.2
   const H = 0.25
+  const yOffset = 2.0 // mount high on the wall
   return (
-    <group>
+    <group position={[0, yOffset, 0]}>
       <mesh position={[0, H / 2, 0]} castShadow receiveShadow>
         <boxGeometry args={[w, H, d]} />
         <meshStandardMaterial color={color} />

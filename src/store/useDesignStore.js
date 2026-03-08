@@ -11,7 +11,11 @@ const defaultRoom = {
   height: 320,
   shape: 'RECT', // RECT | L
   color: '#f5f5f5',
-  wallColor: '#d9d9d9'
+  wallColor: '#d9d9d9',
+  lighting: {
+    intensity: 1.0,
+    preset: 'Day' // Day | Night | Sunset
+  }
 }
 
 export const useDesignStore = create((set, get) => ({
@@ -36,12 +40,12 @@ export const useDesignStore = create((set, get) => ({
     const designs = get().designs.map((d) =>
       d.id === id
         ? {
-            ...d,
-            ...patch,
-            updatedAt: new Date().toISOString(),
-            room: patch.room ? { ...d.room, ...patch.room } : d.room,
-            items: patch.items ?? d.items
-          }
+          ...d,
+          ...patch,
+          updatedAt: new Date().toISOString(),
+          room: patch.room ? { ...d.room, ...patch.room } : d.room,
+          items: patch.items ?? d.items
+        }
         : d
     )
     storage.set(KEY, designs)

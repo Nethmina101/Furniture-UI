@@ -63,7 +63,7 @@ export default function SelectionInspector({ item, onChange, onRemove }) {
       </label>
 
       <label className="field">
-        <span>Elevation (cm)</span>
+        <span>Height (cm)</span>
         <input
           type="number"
           value={Math.round(item.elevation || 0)}
