@@ -34,7 +34,7 @@ export default function App() {
           </ProtectedRoute>
         }
       >
-        <Route index element={<Home />} />
+        <Route index element={<Navigate to="/dashboard" replace />} />
         <Route path="dashboard" element={<Dashboard />} />
         <Route path="designer" element={<Designer />} />
         <Route path="designs" element={<Designs />} />

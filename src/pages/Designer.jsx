@@ -159,32 +159,20 @@ export default function Designer() {
           <RoomForm room={room} onChange={saveRoomPatch} />
 
           <div className="card" style={{ padding: 12 }}>
-            <div className="sectionTitle">Actions</div>
-            <div className="row" style={{ flexWrap: 'wrap', gap: 8 }}>
-              <button className="btn" onClick={() => setSelectedId(null)}>
-                Clear selection
-              </button>
-              <button
-                className="btn"
-                onClick={() => {
-                  // quick auto-fit: bring all items within room bounds
-                  const next = items.map((it) => {
-                    const w = it.w * it.scale
-                    const h = it.h * it.scale
-                    return {
-                      ...it,
-                      x: Math.min(Math.max(0, it.x), Math.max(0, room.width - w)),
-                      y: Math.min(Math.max(0, it.y), Math.max(0, room.height - h))
-                    }
-                  })
-                  saveItems(next)
-                }}
-              >
-                Fit items in room
-              </button>
-            </div>
-            <div className="muted" style={{ marginTop: 8, fontSize: 12 }}>
-              Everything is saved automatically (LocalStorage) for fast demo.
+            <button
+              className="btn btnDanger"
+              style={{ width: '100%', backgroundColor: 'rgba(255, 77, 79, 0.1)', color: '#ff4d4f', border: '1px solid #ff4d4f' }}
+              onClick={() => {
+                if (window.confirm('Are you sure you want to remove all furniture from this room?')) {
+                  saveItems([])
+                  setSelectedId(null)
+                }
+              }}
+            >
+              Clear Room Items
+            </button>
+            <div className="muted" style={{ marginTop: 8, fontSize: 12, textAlign: 'center' }}>
+              Everything is saved automatically.
             </div>
           </div>
         </div>

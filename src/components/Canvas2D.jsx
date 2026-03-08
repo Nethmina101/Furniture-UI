@@ -66,10 +66,13 @@ export default function Canvas2D({ room, items, selectedId, onSelect, onChangeIt
   const toCm = (px) => px / scale
 
   const onDragEnd = (id, e) => {
-    const n = e.target
-    const nx = n.x()
-    const ny = n.y()
-    // node position is px relative to pad
+    // Use the reference to the Group to safely bypass Konva's nested child e.target ambiguity
+    const node = itemRefs.current[id]
+    if (!node) return
+
+    const nx = node.x()
+    const ny = node.y()
+
     onChangeItems(
       items.map((it) =>
         it.id === id
@@ -80,7 +83,9 @@ export default function Canvas2D({ room, items, selectedId, onSelect, onChangeIt
   }
 
   const onTransformEnd = (id, e) => {
-    const node = e.target
+    const node = itemRefs.current[id]
+    if (!node) return
+
     const scaleX = node.scaleX()
     const scaleY = node.scaleY()
     node.scaleX(1)
@@ -136,7 +141,9 @@ export default function Canvas2D({ room, items, selectedId, onSelect, onChangeIt
             fontSize={12}
             fill={'rgba(233, 238, 246, 0.85)'}
           />
+        </Layer>
 
+        <Layer>
           {items.map((it) => {
             const wPx = toPx(it.w * it.scale)
             const hPx = toPx(it.h * it.scale)
@@ -162,11 +169,10 @@ export default function Canvas2D({ room, items, selectedId, onSelect, onChangeIt
                   height={hPx}
                   fill={it.color}
                   cornerRadius={Math.min(18, Math.min(wPx, hPx) * 0.2)}
-                  shadowBlur={it.shade * 18}
-                  shadowOpacity={0.35}
-                  shadowOffset={{ x: 4, y: 4 }}
                   stroke={it.id === selectedId ? '#2b6cb0' : '#222'}
                   strokeWidth={it.id === selectedId ? 2 : 1}
+                  perfectDrawEnabled={false}
+                  shadowForStrokeEnabled={false}
                 />
                 <Text
                   text={it.type.toUpperCase()}
@@ -175,18 +181,21 @@ export default function Canvas2D({ room, items, selectedId, onSelect, onChangeIt
                   fontSize={11}
                   fill={'#111'}
                   opacity={0.7}
+                  perfectDrawEnabled={false}
                 />
                 <Line
                   points={[10, hPx - 18, wPx - 10, hPx - 18]}
                   stroke={'rgba(0,0,0,0.25)'}
                   strokeWidth={2}
                   lineCap="round"
+                  perfectDrawEnabled={false}
                 />
                 <Line
                   points={[10, 18, wPx - 10, 18]}
                   stroke={'rgba(255,255,255,0.35)'}
                   strokeWidth={2}
                   lineCap="round"
+                  perfectDrawEnabled={false}
                 />
               </Group>
             )

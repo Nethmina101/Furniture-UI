@@ -39,7 +39,6 @@ export default function AppShell() {
             </>
           ) : (
             <>
-              <LinkItem to="/" label="Home" icon="🏠" />
               <LinkItem to="/dashboard" label="Dashboard" icon="📊" />
               <LinkItem to="/designer" label="Designer" icon="🛋️" />
               <LinkItem to="/designs" label="Saved Designs" icon="💾" />

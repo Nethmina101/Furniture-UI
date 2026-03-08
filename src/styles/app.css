@@ -495,6 +495,7 @@ option {
   background: rgba(0, 0, 0, 0.12);
   overflow: hidden;
   position: relative;
+  user-select: none;
 }
 
 .canvasLegend {
@@ -508,6 +509,7 @@ option {
   border-radius: 14px;
   border: 1px solid rgba(255, 255, 255, 0.10);
   background: rgba(15, 30, 54, 0.70);
+  pointer-events: none;
 }
 
 .chip {
@@ -1066,4 +1068,94 @@ option {
 .perfLatestMeta {
   font-size: 12px;
   color: var(--muted);
+}
+
+/* ─── Design Insights (merged analytic) ─────────────────────── */
+.insightsSummary {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+  margin-top: 20px;
+  padding-top: 18px;
+  border-top: 1px solid rgba(255, 255, 255, 0.07);
+}
+
+@media (max-width: 1100px) {
+  .insightsSummary {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+.insightItem {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  padding: 14px 16px;
+  border-radius: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.insightItemLabel {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.insightItemValue {
+  font-size: 16px;
+  font-weight: 800;
+  color: #6ee7b7;
+}
+
+.insightItemHint {
+  font-size: 11px;
+  color: var(--muted);
+}
+
+.insightProgressBar {
+  height: 8px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.08);
+  overflow: hidden;
+}
+
+.insightProgressFill {
+  height: 100%;
+  border-radius: 999px;
+  background: linear-gradient(90deg, #6ee7b7, #60a5fa);
+  transition: width 0.8s ease;
+}
+
+.insightShapeRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.insightShapeBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 10px;
+  border-radius: 999px;
+  border: 1px solid rgba(110, 231, 183, 0.2);
+  background: rgba(110, 231, 183, 0.08);
+  font-size: 12px;
+}
+
+.insightShapeCount {
+  font-weight: 800;
+  color: #6ee7b7;
+}
+
+.insightDesignName {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
