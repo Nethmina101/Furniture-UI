@@ -19,6 +19,7 @@ const LinkItem = ({ to, label, icon }) => (
 export default function AppShell() {
   const { user, logout } = useAuth()
   const nav = useNavigate()
+  const isAdmin = user?.role === 'admin'
 
   return (
     <div className="app">
@@ -32,20 +33,31 @@ export default function AppShell() {
         </div>
 
         <nav className="nav">
-          <LinkItem to="/" label="Home" icon="🏠" />
-          <LinkItem to="/dashboard" label="Dashboard" icon="📊" />
-          <LinkItem to="/designer" label="Designer" icon="🛋️" />
-          <LinkItem to="/designs" label="Saved Designs" icon="💾" />
-          <LinkItem to="/about" label="About" icon="ℹ️" />
+          {isAdmin ? (
+            <>
+              <LinkItem to="/admin" label="Admin Panel" icon="🔑" />
+            </>
+          ) : (
+            <>
+              <LinkItem to="/" label="Home" icon="🏠" />
+              <LinkItem to="/dashboard" label="Dashboard" icon="📊" />
+              <LinkItem to="/designer" label="Designer" icon="🛋️" />
+              <LinkItem to="/designs" label="Saved Designs" icon="💾" />
+              <LinkItem to="/about" label="About" icon="ℹ️" />
+            </>
+          )}
         </nav>
 
         <div className="sidebarFooter">
           <div className="userCard">
-            <div className="userAvatar" aria-hidden>
+            <div className={'userAvatar ' + (isAdmin ? 'userAvatarAdmin' : '')} aria-hidden>
               {user?.name?.slice(0, 1) ?? 'U'}
             </div>
             <div>
-              <div className="userName">{user?.name}</div>
+              <div className="userName">
+                {user?.name}
+                {isAdmin && <span className="adminBadge">Admin</span>}
+              </div>
               <div className="userMeta">{user?.username}</div>
             </div>
           </div>
@@ -63,9 +75,13 @@ export default function AppShell() {
 
       <main className="main">
         <div className="topbar">
-          <div className="topbarTitle">Design, Preview, Present</div>
+          <div className="topbarTitle">
+            {isAdmin ? '⚙️ Admin Control Panel' : 'Design, Preview, Present'}
+          </div>
           <div className="topbarHint">
-            Create a room in 2D, then view it in 3D.
+            {isAdmin
+              ? 'Manage users, view analytics and furniture usage.'
+              : 'Create a room in 2D, then view it in 3D.'}
           </div>
         </div>
         <div className="content">
