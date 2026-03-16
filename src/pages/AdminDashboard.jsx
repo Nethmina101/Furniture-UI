@@ -10,7 +10,6 @@ import {
     YAxis
 } from 'recharts'
 import { furnitureCatalog } from '../utils/furniture'
-import { useDesignStore } from '../store/useDesignStore'
 import { useAuth } from '../store/useAuth'
 import { storage } from '../store/storage'
 
@@ -66,18 +65,28 @@ const CustomTooltip = ({ active, payload, label }) => {
 }
 
 export default function AdminDashboard() {
-    const designs = useDesignStore((s) => s.designs)
     const { getRegisteredUsers } = useAuth()
     const [activeTab, setActiveTab] = useState('overview')
     const [banMsg, setBanMsg] = useState('')
 
     const users = getRegisteredUsers()
 
+    const allDesigns = useMemo(() => {
+        let all = []
+        users.forEach(u => {
+            if (u.username === 'admin') return
+            const key = `fd_designs_v1_${u.username.toLowerCase()}`
+            const userDesigns = storage.get(key, [])
+            all = all.concat(userDesigns)
+        })
+        return all
+    }, [users])
+
     const stats = useMemo(() => {
         // Build counts for ALL furniture types in the catalog
         const counts = {}
         furnitureCatalog.forEach((f) => { counts[f.type] = 0 })
-        for (const d of designs) {
+        for (const d of allDesigns) {
             for (const it of d.items || []) {
                 if (counts[it.type] != null) counts[it.type] += 1
             }
@@ -97,12 +106,12 @@ export default function AdminDashboard() {
         return {
             chart,
             totalItems,
-            totalDesigns: designs.length,
+            totalDesigns: allDesigns.length,
             totalUsers: users.length,
             mostUsed,
             leastUsed
         }
-    }, [designs, users])
+    }, [allDesigns, users])
 
     const [localUsers, setLocalUsers] = useState(() => {
         return storage.get(USERS_KEY, [])
