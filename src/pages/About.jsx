@@ -9,9 +9,7 @@ export default function About() {
         creates a room and visualises furniture layouts in 2D and 3D.
       </p>
       <div className="callout">
-        <strong>Note:</strong> The earlier chess “Rxf8” summary you pasted is not used
-        as functional input for this app. The app is based on the coursework scenario
-        requirements.
+        <strong>Note:</strong> This React application allows users to design and visualize room layouts with furniture placement in both 2D and 3D views. The system enables a designer to log in, create a room, and arrange furniture interactively to explore different layout options. The application focuses on user interface design, interactive visualisation, and front-end web development concepts.
       </div>
       <p className="muted">
         Data is stored locally in your browser (LocalStorage) for easy demo and speed.

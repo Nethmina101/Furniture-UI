@@ -93,9 +93,6 @@ export default function Login() {
             <button className="btn btnPrimary authSubmit" type="submit">
               Sign In →
             </button>
-            <div className="authNote">
-              🔑 Admin login: <strong>admin</strong> / <strong>admin2024</strong>
-            </div>
           </form>
         )}
 
