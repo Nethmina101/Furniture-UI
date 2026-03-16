@@ -165,10 +165,10 @@ export default function Designer() {
             </div>
           </div>
 
-          {/* ─── Room Settings ─── */}
+          {/* Room Settings */}
           <RoomForm room={room} onChange={saveRoomPatch} />
 
-          {/* ─── Clear Button ─── */}
+          {/* Clear Button */}
           <button
             className="btn btnDanger"
             style={{ width: '100%', padding: '12px 14px' }}

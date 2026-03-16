@@ -57,7 +57,7 @@ export default function Dashboard() {
       if (activityMap[day] != null) activityMap[day] += 1
     }
 
-    // Combined insights chart: one row per design, with items + activity that day
+    // Combined insights chart
     const designInsights = designs
       .slice()
       .reverse()

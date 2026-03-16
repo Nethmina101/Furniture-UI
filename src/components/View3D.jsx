@@ -4,7 +4,7 @@ import { OrbitControls, ContactShadows, Environment } from '@react-three/drei'
 import * as THREE from 'three'
 import { generateRoomPolygon } from '../utils/roomShape'
 
-// ─── Helpers ────────────────────────────────────────────────────
+// Helpers
 function hexToThreeColor(hex) {
   try { return new THREE.Color(hex) }
   catch { return new THREE.Color('#cccccc') }
@@ -39,7 +39,7 @@ function M({ color, preset = 'wood', transparent, opacity, side }) {
   )
 }
 
-// ─── Room ────────────────────────────────────────────────────────
+// Room
 function Room({ room }) {
   const w = room.width / 100
   const h = room.height / 100
@@ -126,7 +126,7 @@ function Room({ room }) {
   )
 }
 
-// ─── Furniture dispatcher ────────────────────────────────────────
+// Furniture dispatcher
 function Furniture({ item, preset }) {
   const x = item.x / 100
   const z = item.y / 100
@@ -167,7 +167,7 @@ function Furniture({ item, preset }) {
   )
 }
 
-// ─── Chair ───────────────────────────────────────────────────────
+// Chair
 function Chair({ color, shade, dims }) {
   const seatH = 0.45, seatT = 0.06, backH = 0.5, leg = 0.04
   const w = Math.max(0.4, dims.w), d = Math.max(0.4, dims.d)
@@ -191,7 +191,7 @@ function Chair({ color, shade, dims }) {
   )
 }
 
-// ─── Table ───────────────────────────────────────────────────────
+// Table
 function Table({ color, shade, dims }) {
   const topY = 0.75, topT = 0.07, legR = 0.05
   const w = Math.max(0.8, dims.w), d = Math.max(0.5, dims.d)
@@ -211,7 +211,7 @@ function Table({ color, shade, dims }) {
   )
 }
 
-// ─── Bed ─────────────────────────────────────────────────────────
+// Bed
 function Bed({ color, shade, dims }) {
   const w = Math.max(1.2, dims.w), d = Math.max(0.9, dims.d)
   return (
@@ -252,7 +252,7 @@ function Bed({ color, shade, dims }) {
   )
 }
 
-// ─── Sofa ────────────────────────────────────────────────────────
+// Sofa
 function Sofa({ color, shade, dims }) {
   const w = Math.max(1.2, dims.w), d = Math.max(0.6, dims.d)
   return (
@@ -299,7 +299,7 @@ function Sofa({ color, shade, dims }) {
   )
 }
 
-// ─── Wardrobe ────────────────────────────────────────────────────
+// Wardrobe
 function Wardrobe({ color, shade, dims }) {
   const w = Math.max(0.8, dims.w), d = Math.max(0.45, dims.d), H = 2.0
   return (
@@ -332,7 +332,7 @@ function Wardrobe({ color, shade, dims }) {
   )
 }
 
-// ─── Bookshelf ───────────────────────────────────────────────────
+// Bookshelf
 function Bookshelf({ color, shade, dims }) {
   const w = Math.max(0.6, dims.w), d = Math.max(0.3, dims.d), H = 1.5
   const books = [
@@ -383,7 +383,7 @@ function Bookshelf({ color, shade, dims }) {
   )
 }
 
-// ─── Plant ───────────────────────────────────────────────────────
+// Plant
 function Plant({ color, shade, dims }) {
   const w = Math.max(0.3, dims.w)
   return (
@@ -420,7 +420,7 @@ function Plant({ color, shade, dims }) {
   )
 }
 
-// ─── Rug ─────────────────────────────────────────────────────────
+// Rug
 function Rug({ color, shade, dims }) {
   const w = Math.max(0.5, dims.w), d = Math.max(0.5, dims.d)
   return (
@@ -438,7 +438,7 @@ function Rug({ color, shade, dims }) {
   )
 }
 
-// ─── TV Unit ─────────────────────────────────────────────────────
+// TV Unit
 function TVUnit({ color, shade, dims }) {
   const w = Math.max(1.0, dims.w), d = Math.max(0.4, dims.d), H = 0.45
   return (
@@ -473,7 +473,7 @@ function TVUnit({ color, shade, dims }) {
   )
 }
 
-// ─── Sideboard / Dresser / Cabinet ───────────────────────────────
+// Sideboard / Dresser / Cabinet
 function Sideboard({ color, shade, dims, isArmoire }) {
   const w = Math.max(0.6, dims.w), d = Math.max(0.3, dims.d), H = isArmoire ? 1.8 : 0.8
   const numDoors = Math.max(2, Math.floor(w / 0.45))
@@ -516,7 +516,7 @@ function Sideboard({ color, shade, dims, isArmoire }) {
   )
 }
 
-// ─── Window ──────────────────────────────────────────────────────
+// Window
 function WindowItem({ color, shade, dims }) {
   const w = Math.max(0.5, dims.w), H = 1.2, y = 1.0 + H / 2, t = 0.05
   return (
@@ -558,7 +558,7 @@ function WindowItem({ color, shade, dims }) {
   )
 }
 
-// ─── Floor Lamp ──────────────────────────────────────────────────
+// Floor Lamp
 function FloorLamp({ color, shade, dims, preset }) {
   const H = 1.65
   return (
@@ -609,7 +609,7 @@ function FloorLamp({ color, shade, dims, preset }) {
   )
 }
 
-// ─── Coffee Table ────────────────────────────────────────────────
+// Coffee Table
 function CoffeeTable({ color, shade, dims }) {
   const w = Math.max(0.6, dims.w), r = w / 2, H = 0.4, t = 0.05
   return (
@@ -639,7 +639,7 @@ function CoffeeTable({ color, shade, dims }) {
   )
 }
 
-// ─── AC Unit ─────────────────────────────────────────────────────
+// AC Unit
 function ACUnit({ color, shade, dims }) {
   const w = Math.max(0.8, dims.w), d = 0.22, H = 0.26, yOff = 2.05
   return (
@@ -670,7 +670,7 @@ function ACUnit({ color, shade, dims }) {
   )
 }
 
-// ─── Pouf & Bench ────────────────────────────────────────────────
+// Pouf & Bench
 function Pouf({ color, shade, dims, isBench }) {
   const w = isBench ? dims.w : Math.max(0.4, dims.w)
   const d = isBench ? dims.d : w
@@ -698,7 +698,7 @@ function Pouf({ color, shade, dims, isBench }) {
   )
 }
 
-// ─── Nightstand & Filing Cabinet ──────────────────────────────────
+// Nightstand & Filing Cabinet
 function Nightstand({ color, shade, dims, isFilingCabinet }) {
   const w = Math.max(0.3, dims.w), d = Math.max(0.3, dims.d), H = isFilingCabinet ? 1.1 : 0.5
   // Calculate how many drawers fit in this height (roughly 0.25 height per drawer)
@@ -733,7 +733,7 @@ function Nightstand({ color, shade, dims, isFilingCabinet }) {
   )
 }
 
-// ─── Coat Rack ───────────────────────────────────────────────────
+// Coat Rack
 function CoatRack({ color, shade, dims }) {
   const H = 1.7
   return (
@@ -762,7 +762,7 @@ function CoatRack({ color, shade, dims }) {
   )
 }
 
-// ─── Main 3D View ────────────────────────────────────────────────
+// Main 3D View
 export default function View3D({ room, items }) {
   const w = room.width / 100
   const h = room.height / 100

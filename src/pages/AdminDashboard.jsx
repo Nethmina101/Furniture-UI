@@ -15,22 +15,22 @@ import { storage } from '../store/storage'
 
 const USERS_KEY = 'fd_users_v1'
 
-// Beautiful gradient palette for each furniture bar
+
 const BAR_COLORS = [
-    '#6ee7b7', // emerald
-    '#60a5fa', // blue
-    '#f472b6', // pink
-    '#fb923c', // orange
-    '#a78bfa', // violet
-    '#34d399', // teal
-    '#facc15', // yellow
-    '#f87171', // red
-    '#38bdf8', // sky
-    '#c084fc', // purple
-    '#4ade80', // green
-    '#fbbf24', // amber
-    '#e879f9', // fuchsia
-    '#f9a8d4', // rose
+    '#6ee7b7',
+    '#60a5fa',
+    '#f472b6',
+    '#fb923c',
+    '#a78bfa',
+    '#34d399',
+    '#facc15',
+    '#f87171',
+    '#38bdf8',
+    '#c084fc',
+    '#4ade80',
+    '#fbbf24',
+    '#e879f9',
+    '#f9a8d4',
 ]
 
 const FURNITURE_ICONS = {
@@ -153,7 +153,7 @@ export default function AdminDashboard() {
                 ))}
             </div>
 
-            {/* Furniture Usage tab */}
+            {/* Furniture Usage */}
             {activeTab === 'overview' && (
                 <div className="card">
                     <div className="rowBetween" style={{ marginBottom: 16 }}>
